@@ -25,10 +25,12 @@ public class Article {
 	@Column(unique = true, nullable = false)
 	private String title;
 	
-	@Column(nullable = false, length = 20000)
+	//@Column(nullable = false, length = 20000)
+	@Column(length = 20000)
 	private String richtext;
 	
-	@Column(nullable = false, length = 20000)
+	//@Column(nullable = false, length = 20000)
+	@Column(length = 20000)
 	private String content;
 	
 	@Column(name = "article_date")
@@ -39,6 +41,7 @@ public class Article {
 	
 	@Column(unique = true, nullable = false)
 	private String value;
+	
 	private String img;
 
 }

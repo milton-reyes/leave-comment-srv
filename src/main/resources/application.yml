@@ -1,0 +1,13 @@
+server:
+  port: ${YUKAPORT}
+spring:
+  datasource:
+    url: jdbc:postgresql://${YUKAJUCO_URL}
+    username: ${YUKAJUCO_U}
+    password: ${YUKAJUCO_P}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQL95Dialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
