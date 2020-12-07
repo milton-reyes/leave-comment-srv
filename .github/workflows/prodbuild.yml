@@ -42,7 +42,7 @@ jobs:
       - name: Build and push
         id: docker_build
         run: |
-          docker build --build-arg ATB_U=${ATABEY_MASTER_U} --build-arg ATB_P=${ATABEY_MASTER_P} --build-arg ATB_URL=${ATABEY_URL} --build-arg ATB_DB_PORT=${ATABEY_DB_PORT} --build-arg ATB_DB_NAME=${ATABEY_DB_NAME} -t skynetbot/leave-comment-srv:latest .
+          docker build --build-arg ATB_U=${ATABEY_MASTER_U} --build-arg ATB_P=${ATABEY_MASTER_P} --build-arg ATB_URL=${ATABEY_URL} --build-arg ATB_DB_PORT=${ATABEY_DB_PORT} --build-arg ATB_DB_NAME=${ATABEY_DB_NAME} -t $DOCKER_HUB_USERNAME/leave-comment-srv:$IMAGE_TAG .
           docker push $DOCKER_HUB_USERNAME/leave-comment-srv:$IMAGE_TAG
           docker tag $DOCKER_HUB_USERNAME/leave-comment-srv:$IMAGE_TAG $DOCKER_HUB_USERNAME/leave-comment-srv:latest
           docker push $DOCKER_HUB_USERNAME/leave-comment-srv:latest
