@@ -17,6 +17,9 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+		<sonar.projectKey>milton-reyes_leave-comment-srv</sonar.projectKey>
+		<sonar.organization>milton-reyes</sonar.organization>
+		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
 
 	<dependencies>
