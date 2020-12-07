@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.yukaju.dtos.ArticleDto;
 import com.yukaju.models.Article;
 import com.yukaju.services.ContentService;
 
@@ -31,8 +32,17 @@ public class ContentController {
 	
 	//@PostMapping("/addarticle")
 	@PostMapping
-	public Article addArticle(@Valid @RequestBody Article article ) {
-		return contentService.addArticle(article);
+	public Article addArticle(@Valid @RequestBody ArticleDto article) {
+		Article newArticle = new Article();
+		if (article != null) {
+			newArticle.setTitle(article.getTitle());
+			newArticle.setContent(article.getContent());
+			newArticle.setRichtext(article.getRichtext());
+			newArticle.setImg(article.getImg());
+			newArticle.setArticleDate(article.getArticleDate());
+			newArticle.setValue(article.getValue());
+		}
+		return contentService.addArticle(newArticle);
 		
 	}
 
