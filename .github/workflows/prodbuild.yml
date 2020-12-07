@@ -11,25 +11,12 @@ env:
   ATABEY_URL: ${{ secrets.ATABEY_URL }}
   ATABEY_DB_PORT: ${{ secrets.ATABEY_DB_PORT }}
   ATABEY_DB_NAME: ${{ secrets.ATABEY_DB_NAME }}
-#  ECR_REPOSITORY_PREFIX: ${{ secrets.ECR_REPOSITORY_PREFIX }}
-#  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-#  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_PREFIX }}-${{ secrets.APP_NAME }}
   IMAGE_TAG: ${{ github.sha }}
 jobs:
   build:
     name: CI to Docker Hub
     runs-on: ubuntu-latest
     steps:
-  #    # ---[ Configuring AWS credentials and Logging in to ECR ]---
-  #    - name: Configure AWS credentials
-  #      uses: aws-actions/configure-aws-credentials@v1
-  #      with:
-  #        aws-access-key-id: ${{ secrets.ECR_ACCESS_KEY_ID }}
-  #        aws-secret-access-key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
-  #        aws-region: ${{ secrets.AWS_REGION }}
-  #    - name: Login to Amazon ECR
-  #      id: login-ecr
-  #      uses: aws-actions/amazon-ecr-login@v1
       - name: Check Out Repo
         uses: actions/checkout@v2
         with:
@@ -46,29 +33,9 @@ jobs:
           docker push $DOCKER_HUB_USERNAME/leave-comment-srv:$IMAGE_TAG
           docker tag $DOCKER_HUB_USERNAME/leave-comment-srv:$IMAGE_TAG $DOCKER_HUB_USERNAME/leave-comment-srv:latest
           docker push $DOCKER_HUB_USERNAME/leave-comment-srv:latest
-#      - name: Set up Docker Buildx
-#        id: buildx
-#        uses: docker/setup-buildx-action@v1
-#      - name: Build and push
-#        id: docker_build
-#        uses: docker/build-push-action@v2
-#        with:
-#          context: ./
-#          file: ./Dockerfile
-#          push: true
-#          tags: $DOCKER_HUB_USERNAME/leave-comment-srv:latest
-#      - name: Image digest
-#        run: echo ${{ steps.docker_build.outputs.digest }}
-  #    - name: Build the image
-  #      id: docker_build
-  #      run: |
-  #        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-  #        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-  #        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-  #        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
   analyze:
     needs: [build]
-    name: Test Code and Analyze Quality
+    name: Test Code and Analyze Quality CI SonarCloud
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -107,5 +74,5 @@ jobs:
   #        aws configure set aws_secret_access_key ${{ secrets.EKS_SECRET_ACCESS_KEY }} --profile p3
   #        aws configure set default.region ${{ secrets.AWS_REGION }} --profile p3
   #        aws eks --region ${{ secrets.AWS_REGION }} update-kubeconfig --profile p3 --name $ECR_REPOSITORY_PREFIX
-  #        kubectl --namespace default set image deployment/ro-user-deployment ro-user-service=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-  #        kubectl --namespace default rollout status deploy/ro-user-deployment
+  #        kubectl --namespace default set image deployment/leave-comment-srv-deployment leave-comment-srv-service=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  #        kubectl --namespace default rollout status deploy/leave-comment-srv-deployment
