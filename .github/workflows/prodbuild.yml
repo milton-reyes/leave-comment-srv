@@ -4,14 +4,15 @@ on:
     branches: [main, dev]
   pull_request:
     types: [opened, synchronize, reopened, closed]
-#env:
+env:
+  DOCKER_HUB_USENAME: ${{ secrets.DOCKER_HUB_USENAME }}
 #  ECR_REPOSITORY_PREFIX: ${{ secrets.ECR_REPOSITORY_PREFIX }}
 #  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
 #  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_PREFIX }}-${{ secrets.APP_NAME }}
-#  IMAGE_TAG: ${{ github.sha }}
+  IMAGE_TAG: ${{ github.sha }}
 jobs:
   build:
-    name: Build Image
+    name: CI to Docker Hub
     runs-on: ubuntu-latest
     steps:
   #    # ---[ Configuring AWS credentials and Logging in to ECR ]---
@@ -24,8 +25,28 @@ jobs:
   #    - name: Login to Amazon ECR
   #      id: login-ecr
   #      uses: aws-actions/amazon-ecr-login@v1
-      - name: Checkout
+      - name: Check Out Repo
         uses: actions/checkout@v2
+        with:
+          ref: 'main'
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USENAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile
+          push: true
+          tags: $DOCKER_HUB_USENAME/leave-comment-srv:latest
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
   #    - name: Build the image
   #      id: docker_build
   #      run: |
@@ -33,35 +54,35 @@ jobs:
   #        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
   #        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
   #        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-  analyze:
-    #needs: [build]
-    name: Test Code and Analyze Quality
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Set up JDK 11
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Cache Maven packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: Build and analyze
+#  analyze:
+#    #needs: [build]
+#    name: Test Code and Analyze Quality
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#        with:
+#          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+#      - name: Set up JDK 11
+#        uses: actions/setup-java@v1
+#        with:
+#          java-version: 11
+#      - name: Cache SonarCloud packages
+#        uses: actions/cache@v1
+#        with:
+#          path: ~/.sonar/cache
+#          key: ${{ runner.os }}-sonar
+#          restore-keys: ${{ runner.os }}-sonar
+#      - name: Cache Maven packages
+#        uses: actions/cache@v1
+#        with:
+#          path: ~/.m2
+#          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+#          restore-keys: ${{ runner.os }}-m2
+#      - name: Build and analyze
         #env:
         #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
         #  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+#        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
   #deploy:
   #  # ---[ Use docker image from the build step and deploy on EKS ]---
   #  #needs: [build, analyze]
