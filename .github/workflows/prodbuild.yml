@@ -44,7 +44,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: $DOCKER_HUB_USENAME/leave-comment-srv:latest
+          tags: $DOCKER_HUB_USERNAME/leave-comment-srv:latest
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
   #    - name: Build the image
