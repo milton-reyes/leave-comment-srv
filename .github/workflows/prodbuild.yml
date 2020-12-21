@@ -5,34 +5,40 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed]
 env:
-  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+  ATABEY_DB_NAME: ${{ secrets.ATABEY_DB_NAME }}
+  ATABEY_DB_PORT: ${{ secrets.ATABEY_DB_PORT }}
   ATABEY_MASTER_U: ${{ secrets.ATABEY_MASTER_U }}
   ATABEY_MASTER_P: ${{ secrets.ATABEY_MASTER_P }}
   ATABEY_URL: ${{ secrets.ATABEY_URL }}
-  ATABEY_DB_PORT: ${{ secrets.ATABEY_DB_PORT }}
-  ATABEY_DB_NAME: ${{ secrets.ATABEY_DB_NAME }}
+  ECR_REPO_NAME: ${{ secrets.ECR_REPO_NAME }}
+  ECR_URI: ${{ secrets.ECR_URI }}
   IMAGE_TAG: ${{ github.sha }}
+  LEAVE_COMMENT_SRV_PORT: ${{ secrets.LEAVE_COMMENT_SRV_PORT }}
 jobs:
   build:
-    name: CI to Docker Hub
+    name: CI to ECR
     runs-on: ubuntu-latest
     steps:
+      - name: ECR Credentials Configuration
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ACCESS_KEY_SECRET }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
       - name: Check Out Repo
         uses: actions/checkout@v2
         with:
           ref: 'main'
-      - name: Login to Docker Hub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       - name: Build and push
         id: docker_build
         run: |
-          docker build --build-arg ATB_U=${ATABEY_MASTER_U} --build-arg ATB_P=${ATABEY_MASTER_P} --build-arg ATB_URL=${ATABEY_URL} --build-arg ATB_DB_PORT=${ATABEY_DB_PORT} --build-arg ATB_DB_NAME=${ATABEY_DB_NAME} -t $DOCKER_HUB_USERNAME/leave-comment-srv:$IMAGE_TAG .
-#          docker push $DOCKER_HUB_USERNAME/leave-comment-srv:$IMAGE_TAG
-#          docker tag $DOCKER_HUB_USERNAME/leave-comment-srv:$IMAGE_TAG $DOCKER_HUB_USERNAME/leave-comment-srv:latest
-#          docker push $DOCKER_HUB_USERNAME/leave-comment-srv:latest
+          docker build --build-arg ATB_SRV_P=${LEAVE_COMMENT_SRV_PORT} --build-arg ATB_U=${ATABEY_MASTER_U} --build-arg ATB_P=${ATABEY_MASTER_P} --build-arg ATB_URL=${ATABEY_URL} --build-arg ATB_DB_PORT=${ATABEY_DB_PORT} --build-arg ATB_DB_NAME=${ATABEY_DB_NAME} -t $ECR_URI/$ECR_REPO_NAME:$IMAGE_TAG .
+          docker push $ECR_URI/$ECR_REPO_NAME:$IMAGE_TAG
+          docker tag $ECR_URI/$ECR_REPO_NAME:$IMAGE_TAG $ECR_URI/$ECR_REPO_NAME:latest
+          docker push $ECR_URI/$ECR_REPO_NAME:latest
   analyze:
     needs: [build]
     name: Test Code and Analyze Quality CI SonarCloud
