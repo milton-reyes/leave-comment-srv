@@ -57,7 +57,7 @@ public class ContentController {
 						|| article.getValue().length() > 254) {
 					throw new InvalidArticleException("Exceding the maximum characters allowed.");
 				} else if (article.getTitle() == null || article.getValue() == null) {
-					throw new InvalidArticleException("Cannot leave empty.");					
+					throw new InvalidArticleException("Cannot leave empty.");
 				} else {
 					newArticle.setTitle(article.getTitle());
 					newArticle.setContent(article.getContent());
@@ -67,13 +67,11 @@ public class ContentController {
 					newArticle.setValue(article.getValue());
 				}
 			} catch (InvalidArticleException e) {
-				//TODO: log this
+				// TODO: log this
 				System.out.println(e);
 			}
-
 		}
 		return contentService.addArticle(newArticle);
-
 	}
 
 }
