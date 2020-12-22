@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.yukaju.dtos.ArticleDto;
-import com.yukaju.exceptions.HttpStatusException;
+import com.yukaju.exceptions.InvalidArticleException;
 import com.yukaju.models.Article;
 import com.yukaju.services.ContentService;
 
@@ -35,11 +35,15 @@ public class ContentController {
 	}
 
 	@GetMapping("/articles/{id}")
-	public ResponseEntity<Optional<Article>> getArticleById(@PathVariable(value = "id") int articleId)
-			throws HttpStatusException {
-		Optional<Article> article = Optional.ofNullable(contentService.findById(articleId).orElseThrow(
-				() -> new HttpStatusException(404, "Article with id of " + articleId + " was not found.")));
-		return ResponseEntity.ok().body(article);
+	public ResponseEntity<Article> getArticleById(@PathVariable(value = "id") int articleId) {
+		Optional<Article> article = contentService.findById(articleId);
+		if (article.isPresent()) {
+			return ResponseEntity.ok().body(article.get());
+		} else {
+			return ResponseEntity.notFound().build();
+			// throw new HttpStatusException(404, "Article with id of " + articleId + " was
+			// not found.");
+		}
 	}
 
 	// @PostMapping("/addarticle")
@@ -47,12 +51,26 @@ public class ContentController {
 	public Article addArticle(@Valid @RequestBody ArticleDto article) {
 		Article newArticle = new Article();
 		if (article != null) {
-			newArticle.setTitle(article.getTitle());
-			newArticle.setContent(article.getContent());
-			newArticle.setRichtext(article.getRichtext());
-			newArticle.setImg(article.getImg());
-			newArticle.setArticleDate(article.getArticleDate());
-			newArticle.setValue(article.getValue());
+			try {
+				if (article.getContent().length() > 19999 || article.getRichtext().length() > 19999
+						|| article.getImg().length() > 254 || article.getTitle().length() > 254
+						|| article.getValue().length() > 254) {
+					throw new InvalidArticleException("Exceding the maximum characters allowed.");
+				} else if (article.getTitle() == null || article.getValue() == null) {
+					throw new InvalidArticleException("Cannot leave empty.");					
+				} else {
+					newArticle.setTitle(article.getTitle());
+					newArticle.setContent(article.getContent());
+					newArticle.setRichtext(article.getRichtext());
+					newArticle.setImg(article.getImg());
+					newArticle.setArticleDate(article.getArticleDate());
+					newArticle.setValue(article.getValue());
+				}
+			} catch (InvalidArticleException e) {
+				//TODO: log this
+				System.out.println(e);
+			}
+
 		}
 		return contentService.addArticle(newArticle);
 
