@@ -2,6 +2,7 @@ package com.yukaju.services;
 
 //import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,10 @@ public class ContentService {
 	
 	public List<Article> getArticles() {
 		return articleRepo.findAll();
+	}
+	
+	public Optional<Article> findById(int id) {
+		return articleRepo.findById(id);
 	}
 	
 	public Article addArticle(Article article) {
