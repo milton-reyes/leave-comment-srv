@@ -48,29 +48,24 @@ public class ContentController {
 
 	// @PostMapping("/addarticle")
 	@PostMapping
-	public Article addArticle(@Valid @RequestBody ArticleDto article) {
+	public Article addArticle(@Valid @RequestBody ArticleDto article) throws InvalidArticleException {
 		Article newArticle = new Article();
-		if (article != null) {
-			try {
-				if (article.getContent().length() > 19999 || article.getRichtext().length() > 19999
-						|| article.getImg().length() > 254 || article.getTitle().length() > 254
-						|| article.getValue().length() > 254) {
-					throw new InvalidArticleException("Exceding the maximum characters allowed.");
-				} else if (article.getTitle() == null || article.getValue() == null) {
-					throw new InvalidArticleException("Cannot leave empty.");
-				} else {
-					newArticle.setTitle(article.getTitle());
-					newArticle.setContent(article.getContent());
-					newArticle.setRichtext(article.getRichtext());
-					newArticle.setImg(article.getImg());
-					newArticle.setArticleDate(article.getArticleDate());
-					newArticle.setValue(article.getValue());
-				}
-			} catch (InvalidArticleException e) {
-				// TODO: log this
-				System.out.println(e);
-			}
+		if (article.getTitle() == null || article.getValue() == null) {
+			throw new InvalidArticleException("Cannot leave empty.");
 		}
+		if (article.getContent().length() > 19999 || article.getRichtext().length() > 19999
+				|| article.getImg().length() > 254 || article.getTitle().length() > 254
+				|| article.getValue().length() > 254) {
+			throw new InvalidArticleException("Exceding the maximum characters allowed.");
+		}
+
+		newArticle.setTitle(article.getTitle());
+		newArticle.setContent(article.getContent());
+		newArticle.setRichtext(article.getRichtext());
+		newArticle.setImg(article.getImg());
+		newArticle.setArticleDate(article.getArticleDate());
+		newArticle.setValue(article.getValue());
+
 		return contentService.addArticle(newArticle);
 	}
 
